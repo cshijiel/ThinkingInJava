@@ -63,7 +63,7 @@ class WaitPerson implements Runnable {
 
                 System.out.println("WaitPerson got " + restaurant.meal);
 
-                synchronized (restaurant.meal) {
+                synchronized (restaurant.chef) {
                     restaurant.meal = null;
                     restaurant.chef.notifyAll();
                 }
@@ -93,17 +93,17 @@ class Chef implements Runnable {
                         wait();
                     }
                 }
+                if (++count == 10) {
+                    System.out.println("Out of food, closing.");
+                    restaurant.executorService.shutdownNow();
+                }
+                System.out.println("Order up! ");
+                synchronized (restaurant.waitPerson) {
+                    restaurant.meal = new Meal(count);
+                    restaurant.waitPerson.notifyAll();
+                }
+                TimeUnit.MILLISECONDS.sleep(1000);
             }
-            if (++count == 10) {
-                System.out.println("Out of food, closing.");
-                restaurant.executorService.shutdownNow();
-            }
-            System.out.println("Order up! ");
-            synchronized (restaurant.waitPerson){
-                restaurant.meal = new Meal(count);
-                restaurant.waitPerson.notifyAll();
-            }
-            TimeUnit.MILLISECONDS.sleep(100);
         } catch (InterruptedException e) {
             System.out.println("Chef interrupted!");
         }
