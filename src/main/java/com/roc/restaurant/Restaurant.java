@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
  * 生产者消费者模型--餐厅模型
  *
  * @author Roc
- * @title DesignPatterns
+ * @title 生产者消费者模型
  * @date 16/8/25
  */
 public class Restaurant {
