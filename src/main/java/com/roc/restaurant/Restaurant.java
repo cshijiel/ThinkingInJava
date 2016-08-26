@@ -14,9 +14,9 @@ import java.util.concurrent.TimeUnit;
 public class Restaurant {
 
     Meal meal;
-    ExecutorService executorService = Executors.newCachedThreadPool();
     WaitPerson waitPerson = new WaitPerson(this);
     Chef chef = new Chef(this);
+    ExecutorService executorService = Executors.newCachedThreadPool();
 
     public Restaurant() {
         executorService.execute(chef);
@@ -60,7 +60,7 @@ class WaitPerson implements Runnable {
                         wait();
                     }
                 }
-
+                TimeUnit.MILLISECONDS.sleep(500 + ((int) (Math.random() * 200)));
                 System.out.println("WaitPerson got " + restaurant.meal);
 
                 synchronized (restaurant.chef) {
