@@ -60,22 +60,23 @@ class WaitPerson implements Runnable {
     public void run() {
         try {
             while (!Thread.interrupted()) {
-                restaurant.lock.lock();
-                while (restaurant.meal == null) {
-                    restaurant.condition.await();
+                try {
+                    restaurant.lock.lock();
+                    while (restaurant.meal == null) {
+                        restaurant.condition.await();
+                    }
+
+                    TimeUnit.MILLISECONDS.sleep(500 + ((int) (Math.random() * 200)));
+                    System.out.println("WaitPerson got " + restaurant.meal);
+
+                    restaurant.meal = null;
+                    restaurant.condition.signalAll();
+                } finally {
+                    restaurant.lock.unlock();
                 }
-
-                TimeUnit.MILLISECONDS.sleep(500 + ((int) (Math.random() * 200)));
-                System.out.println("WaitPerson got " + restaurant.meal);
-
-                restaurant.meal = null;
-                restaurant.condition.signalAll();
-
             }
         } catch (InterruptedException e) {
             System.out.println("WaitPerson interrupted!");
-        } finally {
-            restaurant.lock.unlock();
         }
     }
 }
@@ -93,26 +94,26 @@ class Chef implements Runnable {
     public void run() {
         try {
             while (!Thread.interrupted()) {
-                restaurant.lock.lock();
-                while (restaurant.meal != null) {
-                    restaurant.condition.await();
+                try {
+                    restaurant.lock.lock();
+                    while (restaurant.meal != null) {
+                        restaurant.condition.await();
+                    }
+                    if (++count == 10) {
+                        System.out.println("Out of food, closing.");
+                        restaurant.executorService.shutdownNow();
+                    }
+                    System.out.println("Order up! ");
+                    restaurant.meal = new Meal(count);
+                    restaurant.condition.signalAll();
+                    TimeUnit.MILLISECONDS.sleep(1000);
+                } finally {
+                    restaurant.lock.unlock();
                 }
-
-
-                if (++count == 10) {
-                    System.out.println("Out of food, closing.");
-                    restaurant.executorService.shutdownNow();
-                }
-                System.out.println("Order up! ");
-                restaurant.meal = new Meal(count);
-                restaurant.condition.signalAll();
-                TimeUnit.MILLISECONDS.sleep(1000);
             }
         } catch (InterruptedException e) {
             System.out.println("Chef interrupted!");
             System.exit(0);
-        } finally {
-            restaurant.lock.unlock();
         }
     }
 }
