@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class Client {
     public static void main(String[] args) {
-        for (int index = 0; index < 100; index++) {
+        for (int index = 0; index < 10; index++) {
             ExecutorService executorService = Executors.newFixedThreadPool(8);
             CountDownLatch latch = new CountDownLatch(3);
 
@@ -30,8 +30,6 @@ public class Client {
                 e.printStackTrace();
             }
         }
-
-
     }
 }
 
@@ -76,9 +74,12 @@ class Boss implements Runnable {
 
     @Override
     public void run() {
+
         long t = 0;
         try {
+            Thread.currentThread().sleep(300 + (int) (Math.random() * 2000));
             long start = System.currentTimeMillis();
+            // 在此处等待,直到latch.getCount() == 0被唤醒继续执行
             latch.await();
             t = System.currentTimeMillis() - start;
         } catch (Exception e) {
